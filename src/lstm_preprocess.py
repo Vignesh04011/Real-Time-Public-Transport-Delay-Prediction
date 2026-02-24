@@ -34,3 +34,6 @@ np.save("data/raw/y.npy", y)
 print("LSTM data ready!")
 print("Shape X:", X.shape)
 print("Shape y:", y.shape)
+
+import joblib
+joblib.dump(scaler, "data/raw/scaler.save")
