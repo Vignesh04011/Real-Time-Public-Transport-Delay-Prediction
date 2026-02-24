@@ -1,6 +1,7 @@
 import pandas as pd
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 import matplotlib.pyplot as plt
+import joblib
 
 # Load data
 df = pd.read_csv("data/raw/resampled_delay.csv")
@@ -13,14 +14,24 @@ train = df.iloc[:int(len(df)*0.8)]
 test = df.iloc[int(len(df)*0.8):]
 
 # SARIMA Model
-model = SARIMAX(train['Delay_Seconds'],
-                order=(2,0,2),
-                seasonal_order=(1,0,1,12))
+model = SARIMAX(
+    train['Delay_Seconds'],
+    order=(2,0,2),
+    seasonal_order=(1,0,1,12)
+)
 
 model_fit = model.fit()
 
+# ✅ SAVE MODEL
+joblib.dump(model_fit, "outputs/sarima_model.pkl")
+
 # Predict
 predictions = model_fit.forecast(steps=len(test))
+
+def predict_sarima():
+    model = joblib.load("outputs/sarima_model.pkl")
+    forecast = model.forecast(steps=1)
+    return float(forecast[0])
 
 # Plot
 plt.figure(figsize=(10,5))

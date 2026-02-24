@@ -1,7 +1,10 @@
+import os
+os.environ["KERAS_BACKEND"] = "tensorflow"
+
 import numpy as np
 import joblib
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
+from keras.models import Sequential, load_model
+from keras.layers import LSTM, Dense
 import matplotlib.pyplot as plt
 
 # Load data
@@ -27,14 +30,23 @@ model.compile(optimizer='adam', loss='mse')
 # Train
 model.fit(X_train, y_train, epochs=20, batch_size=16)
 
+# ✅ SAVE MODEL AFTER TRAINING
+model.save("outputs/lstm_model.keras")
+
 # Predict
 pred = model.predict(X_test)
 
 pred = scaler.inverse_transform(pred)
-y_test = scaler.inverse_transform(y_test)
+y_test = scaler.inverse_transform(y_test.reshape(-1,1))
 
 np.save("data/raw/lstm_pred.npy", pred)
 np.save("data/raw/lstm_actual.npy", y_test)
+
+# ✅ PREDICT FUNCTION (used by Streamlit)
+def predict_lstm(input_sequence):
+    model = load_model("outputs/lstm_model.keras", compile=False)
+    prediction = model.predict(input_sequence)
+    return float(prediction[0][0])
 
 # Plot
 plt.figure(figsize=(10,5))
